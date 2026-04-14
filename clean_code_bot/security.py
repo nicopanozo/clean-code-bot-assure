@@ -16,7 +16,8 @@ _INJECTION_HINT_PATTERNS: tuple[re.Pattern[str], ...] = (
         r"(?is)\b(ignore|disregard)\b.{0,80}\b(previous|prior|above)\b.{0,40}\b(instructions?|prompt|system)\b"
     ),
     re.compile(r"(?is)\b(you are now|new instructions?|override)\b"),
-    re.compile(r"(?is)\b(system|assistant)\s*[:>]"),
+    # Role markers at line start (avoid matching phrases like "file system:").
+    re.compile(r"(?im)^\s*(system|assistant)\s*[:>]"),
     re.compile(r"(?is)<\s*/?\s*system\s*>"),
     re.compile(r"(?is)\b(secret|password|api[_-]?key|token)\b.{0,40}\b(is|are|=|:)\b"),
 )
