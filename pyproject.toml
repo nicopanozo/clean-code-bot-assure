@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "clean-code-bot"
+version = "0.1.0"
+description = "CLI that refactors and documents source files using CoT-style LLM prompts."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "click>=8.1,<9",
+  "openai>=1.40,<2",
+  "python-dotenv>=1,<2",
+]
+
+[project.scripts]
+clean-code-bot = "clean_code_bot.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["clean_code_bot*"]
