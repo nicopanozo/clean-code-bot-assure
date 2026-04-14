@@ -1,8 +1,9 @@
 """
-Illustrative "after" style for `order_service_before.py`.
+Checkout order orchestration for the storefront monolith.
 
-This file is a human-authored sample showing the kind of structure and documentation
-the CLI is meant to encourage. It is not guaranteed to match model output byte-for-byte.
+Handles pricing from the product catalog, payment pre-checks, persistence into ``orders`` /
+``order_lines``, and a post-commit customer email. Error responses intentionally mirror the
+legacy ``{"e": ...}`` contract consumed by the BFF.
 """
 
 from __future__ import annotations
@@ -16,7 +17,7 @@ PaymentMethod = Literal["cc", "po"]
 
 @dataclass(frozen=True)
 class LineItem:
-    """A single order line referencing a product id and quantity."""
+    """Single sellable line: product identifier and requested quantity."""
 
     product_id: int
     quantity: int
@@ -24,10 +25,14 @@ class LineItem:
 
 class OrderService:
     """
-    Coordinates order creation: pricing, payment authorization, persistence, notification.
+    Application service that owns the happy-path for placing an order.
 
-    Dependencies are injected to respect Dependency Inversion (depend on abstractions
-    in a larger codebase; here we keep the example small).
+    Parameters
+    ----------
+    database:
+        Thin query executor used elsewhere in this service (raw SQL kept for parity with legacy).
+    mailer:
+        Outbound notification adapter (SMTP abstraction in production).
     """
 
     def __init__(self, database: Any, mailer: Any) -> None:
@@ -41,15 +46,18 @@ class OrderService:
         payment_method: PaymentMethod,
     ) -> dict[str, Any]:
         """
-        Create an order for `user_id` if inventory/pricing and payment succeed.
+        Attempt to place an order for ``user_id``.
 
-        Returns a dict with either success fields or a stable error code in ``"e"``.
+        Returns
+        -------
+        dict
+            ``{"ok": True, "id": <order_id>, "t": <total>}`` on success, otherwise ``{"e": <code>}``.
         """
         user = self._database.q("select * from users where id=?", user_id)
         if not user:
             return {"e": "no user"}
 
-        line_items = [LineItem(pid=item["pid"], quantity=item["q"]) for item in items]
+        line_items = [LineItem(product_id=item["pid"], quantity=item["q"]) for item in items]
         total = self._calculate_total(line_items)
         if isinstance(total, dict):
             return total

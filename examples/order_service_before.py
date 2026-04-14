@@ -1,5 +1,4 @@
-# Example "before" code for Clean Code Bot — not production quality.
-
+# checkout_svc.py — legacy path (Q4-22 hotfix). TODO: someone refactor this
 
 class OSvc:
     def __init__(self, db, mail):

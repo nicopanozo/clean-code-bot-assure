@@ -38,7 +38,9 @@ python -m clean_code_bot refactor examples/order_service_before.py
 
 ## Examples
 
-See `examples/` for **before** snapshots and an **illustrative after** sample. Live model output will differ; treat the “after” file as a style reference, not a golden master.
+See `examples/` for several **before / after** pairs (Python and JavaScript) that read like plausible
+legacy refactors. The `*_after` files are hand-authored fixtures meant to represent an idealized
+post-bot outcome; model output will differ and should always be reviewed.
 
 ## Publishing to GitHub (SSH, personal account)
 
